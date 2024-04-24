@@ -1,0 +1,81 @@
+version: '3'
+services:
+  
+  #PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: digitalocean.com/php
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  #MySQL Service
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+
+  #Minio S3 Storage
+  # s3:
+  #   image: minio/minio:RELEASE.2023-01-12T02-06-16Z.fips
+  #   container_name: minio
+  #   restart: unless-stopped
+  #   tty: true
+  #   ports:
+  #     - "9000:9000"
+  #     - "9090:9090"
+  #   command: server /data --console-address ":9090"
+  #   environment:
+  #     - MINIO_ACCESS_KEY=admin
+  #     - MINIO_SECRET_KEY=adminadmin
+  #   volumes:
+  #     - ~/minio/data:/data
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+    
+#Volumes
+volumes:
+  dbdata:
+    driver: local
