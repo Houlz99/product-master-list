@@ -2,9 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\SkillController;
-use App\Http\Controllers\Api\Practice\LeetController;
-use App\Http\Controllers\Api\Practice\AnswerController;
+use App\Http\Controllers\Api\V1\ProductMasterListController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,10 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::group(['prefix' => 'v1'], function() {
-    Route::apiResource('skills', SkillController::class);
-});
-
-Route::group(['prefix' => 'practice'], function() {
-    Route::put('leet', [AnswerController::class, 'execute']);
-    // Route::put('leet', [LeetController::class, 'execute']);
+    Route::get('products', [ProductMasterListController::class, 'index']);
+    Route::post('products/upload', [ProductMasterListController::class, 'upload']);
 });
